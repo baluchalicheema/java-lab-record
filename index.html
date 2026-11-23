@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Lab Record</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #5A52D5;
+            --primary-light: #8B83FF;
+            --accent: #FF6584;
+            --bg-dark: #0F0C29;
+            --bg-mid: #302B63;
+            --bg-light: #24243E;
+            --surface: #1E1B3A;
+            --surface-hover: #2A2650;
+            --text-primary: #EAEAFF;
+            --text-secondary: #A8A4CE;
+            --text-muted: #6E6B8A;
+            --border: rgba(108, 99, 255, 0.2);
+            --glow: rgba(108, 99, 255, 0.4);
+            --success: #00D68F;
+            --code-bg: #151030;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 50%, var(--bg-light) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== TOP BAR ===== */
+        .top-bar {
+            background: linear-gradient(135deg, rgba(15, 12, 41, 0.95), rgba(48, 43, 99, 0.95));
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 40px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .top-bar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--accent), var(--primary), transparent);
+        }
+
+        .profile-container {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .profile-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 20px var(--glow), 0 0 40px rgba(108, 99, 255, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .profile-icon:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px var(--glow), 0 0 60px rgba(108, 99, 255, 0.25);
+            cursor: pointer;
+        }
+
+        /* ===== LIGHTBOX MODAL ===== */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            position: relative;
+            animation: lightboxZoom 0.35s ease;
+        }
+
+        @keyframes lightboxZoom {
+            from { transform: scale(0.6); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .lightbox-content img {
+            max-width: 85vw;
+            max-height: 80vh;
+            border-radius: 16px;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 40px var(--glow), 0 20px 60px rgba(0, 0, 0, 0.5);
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -16px; right: -16px;
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
+        }
+
+        .lightbox-close:hover {
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 6px 25px rgba(108, 99, 255, 0.6);
+        }
+
+        .lightbox-name {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .lightbox-name span {
+            display: block;
+            font-size: 13px;
+            font-weight: 300;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .student-info h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .student-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 300;
+        }
+
+        .title-section {
+            text-align: right;
+        }
+
+        .title-section h2 {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .title-section .subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 4px;
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 310px;
+            background: rgba(30, 27, 58, 0.8);
+            backdrop-filter: blur(15px);
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            padding: 24px 18px;
+            flex-shrink: 0;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--primary-dark); border-radius: 3px; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-header .icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .lab-list { list-style: none; }
+
+        .lab-list li { margin-bottom: 6px; }
+
+        .lab-list a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            cursor: pointer;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .lab-list a .session-num {
+            width: 30px;
+            height: 30px;
+            background: var(--surface);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-light);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .lab-list a:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--border);
+            transform: translateX(4px);
+        }
+
+        .lab-list a:hover .session-num {
+            background: var(--primary);
+            color: white;
+        }
+
+        .lab-list a.active {
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.15), rgba(255, 101, 132, 0.08));
+            color: var(--text-primary);
+            border-color: var(--primary);
+            font-weight: 500;
+            box-shadow: 0 0 20px rgba(108, 99, 255, 0.1);
+        }
+
+        .lab-list a.active .session-num {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+
+        .lab-list a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* ===== CONTENT VIEWER ===== */
+        .viewer-container {
+            flex-grow: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+            background: radial-gradient(ellipse at top right, rgba(108, 99, 255, 0.05), transparent 50%),
+                        radial-gradient(ellipse at bottom left, rgba(255, 101, 132, 0.03), transparent 50%);
+        }
+
+        .viewer-container::-webkit-scrollbar { width: 8px; }
+        .viewer-container::-webkit-scrollbar-track { background: transparent; }
+        .viewer-container::-webkit-scrollbar-thumb { background: var(--primary-dark); border-radius: 4px; }
+
+        .welcome-message {
+            text-align: center;
+            margin-top: 15%;
+            color: var(--text-muted);
+        }
+
+        .welcome-message .welcome-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .welcome-message h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        /* ===== THEORY CONTENT STYLING ===== */
+        .theory-content {
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .theory-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .theory-header .lab-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
+        .theory-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .theory-header .aim {
+            margin-top: 10px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .theory-section {
+            margin-bottom: 28px;
+        }
+
+        .theory-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theory-section h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .theory-section p, .theory-section li {
+            font-size: 14.5px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .theory-section ul, .theory-section ol {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .theory-section li {
+            margin-bottom: 6px;
+        }
+
+        .theory-section li::marker {
+            color: var(--primary-light);
+        }
+
+        .key-points {
+            background: rgba(108, 99, 255, 0.08);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 0 10px 10px 0;
+            padding: 18px 22px;
+            margin: 16px 0;
+        }
+
+        .key-points h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block .code-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block pre {
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #c3cee3;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .code-block .keyword { color: #c792ea; }
+        .code-block .type { color: #82aaff; }
+        .code-block .string { color: #c3e88d; }
+        .code-block .comment { color: #546e7a; font-style: italic; }
+        .code-block .number { color: #f78c6c; }
+        .code-block .method { color: #82aaff; }
+
+        .concept-card {
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.05), rgba(255, 101, 132, 0.03));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 16px 0;
+        }
+
+        .concept-card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .concept-card p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        table.theory-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        table.theory-table th {
+            background: rgba(108, 99, 255, 0.15);
+            color: var(--primary-light);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+
+        table.theory-table td {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        table.theory-table tr:hover td {
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .pdf-embed-section {
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pdf-embed-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pdf-embed-section h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .pdf-embed-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            background: white;
+        }
+
+        .pdf-embed-wrapper object {
+            display: block;
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="profile-container">
+            <img src="profile.jpeg" alt="Profile Photo" class="profile-icon" onclick="openLightbox()">
+            <div class="student-info">
+                <h1>Ch.V.S.Bala Koteswararao</h1>
+                <p>Roll Number: 26EU02906 &nbsp;|&nbsp; Section: AIML-B</p>
+            </div>
+        </div>
+        <div class="title-section">
+            <h2>☕ Java Lab Record</h2>
+            <div class="subtitle">Object Oriented Programming</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="icon">📚</div>
+                <h2>Lab Sessions</h2>
+            </div>
+            <ul class="lab-list">
+                <li><a onclick="showTheory(1, this)"><span class="session-num">01</span>Introduction to Java</a></li>
+                <li><a onclick="showTheory(2, this)"><span class="session-num">02</span>Java Installation & Setup</a></li>
+                <li><a onclick="showTheory(3, this)"><span class="session-num">03</span>Data Types & Variables</a></li>
+                <li><a onclick="showTheory(6, this)"><span class="session-num">04</span>Classes & Objects</a></li>
+                <li><a onclick="showTheory(7, this)"><span class="session-num">05</span>Inheritance</a></li>
+                <li><a onclick="showTheory(8, this)"><span class="session-num">06</span>Interfaces & Abstract Classes</a></li>
+                <li><a onclick="showTheory(10, this)"><span class="session-num">07</span>Exception Handling</a></li>
+                <li><a onclick="showTheory(11, this)"><span class="session-num">08</span>Multithreading</a></li>
+            </ul>
+        </div>
+
+        <div class="viewer-container" id="viewerContainer">
+            <div class="welcome-message" id="welcomeMsg">
+                <span class="welcome-icon">☕</span>
+                <h3>Welcome to Java Lab Record</h3>
+                <p>Select a lab session from the sidebar to explore the theory and concepts.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const theoryData = {
+            1: {
+                badge: "Lab Session 1",
+                title: "Introduction to Java Programming",
+                aim: "To understand the fundamentals of Java programming language, its history, features, and the basic structure of a Java program.",
+                pdf: "LAB SESSION 1 WORK.pdf",
+                sections: [
+                    {
+                        heading: "What is Java?",
+                        content: `<p>Java is a high-level, class-based, object-oriented programming language developed by <strong>James Gosling</strong> at Sun Microsystems in 1995. It is designed to have as few implementation dependencies as possible, following the principle of <em>"Write Once, Run Anywhere" (WORA)</em>.</p>
+                        <p>Java applications are compiled to bytecode that can run on any Java Virtual Machine (JVM) regardless of the underlying computer architecture, making it one of the most platform-independent languages available today.</p>`
+                    },
+                    {
+                        heading: "Key Features of Java",
+                        content: `<ul>
+                            <li><strong>Platform Independent:</strong> Java code is compiled into bytecode which runs on the JVM, making it platform-independent at the source level.</li>
+                            <li><strong>Object-Oriented:</strong> Everything in Java is an object. It supports encapsulation, inheritance, polymorphism, and abstraction.</li>
+                            <li><strong>Robust & Secure:</strong> Strong memory management, automatic garbage collection, and exception handling mechanisms make Java robust. The lack of explicit pointers enhances security.</li>
+                            <li><strong>Multithreaded:</strong> Java supports concurrent execution of two or more threads for maximum CPU utilization.</li>
+                            <li><strong>Distributed:</strong> Java facilitates distributed computing with technologies like RMI and EJB.</li>
+                            <li><strong>Simple & Familiar:</strong> Java syntax is largely derived from C/C++, but eliminates complex features like pointers and multiple inheritance.</li>
+                        </ul>`
+                    },
+                    {
+                        heading: "Java Program Structure",
+                        content: `<p>Every Java program consists of at least one class definition. The basic structure includes:</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="comment">// This is a simple Java program</span>
+<span class="keyword">public class</span> <span class="type">HelloWorld</span> {
+    <span class="keyword">public static void</span> <span class="method">main</span>(String[] args) {
+        System.out.println(<span class="string">"Hello, World!"</span>);
+    }
+}</pre>
+                        </div>
+                        <div class="key-points">
+                            <h4>🔑 Key Points</h4>
+                            <ul>
+                                <li><code>public class</code> — declares a class that is accessible from anywhere</li>
+                                <li><code>main()</code> — the entry point of every Java application</li>
+                                <li><code>System.out.println()</code> — outputs text to the console</li>
+                                <li>The filename must match the public class name</li>
+                            </ul>
+                        </div>`
+                    },
+                    {
+                        heading: "JDK, JRE, and JVM",
+                        content: `<div class="concept-card">
+                            <h4>Understanding the Java Ecosystem</h4>
+                            <p><strong>JVM (Java Virtual Machine):</strong> An abstract machine that provides the runtime environment in which Java bytecode is executed. It is platform-dependent.</p>
+                            <p style="margin-top:8px"><strong>JRE (Java Runtime Environment):</strong> Provides the libraries, JVM, and other components to run Java applications. It does not include development tools.</p>
+                            <p style="margin-top:8px"><strong>JDK (Java Development Kit):</strong> A full-featured software development kit that includes JRE plus development tools like the compiler (javac), debugger, and documentation tools.</p>
+                        </div>
+                        <table class="theory-table">
+                            <tr><th>Component</th><th>Purpose</th><th>Includes</th></tr>
+                            <tr><td>JVM</td><td>Execute bytecode</td><td>Interpreter, JIT Compiler</td></tr>
+                            <tr><td>JRE</td><td>Run Java programs</td><td>JVM + Libraries</td></tr>
+                            <tr><td>JDK</td><td>Develop & run programs</td><td>JRE + Dev Tools</td></tr>
+                        </table>`
+                    }
+                ]
+            },
+            2: {
+                badge: "Lab Session 2",
+                title: "Java Installation & Environment Setup",
+                aim: "To install the Java Development Kit (JDK), configure environment variables, and verify the installation by compiling and running a Java program.",
+                pdf: "LAB SESSION 2 WORK(INSTALLATION OF JAVA) (1).pdf",
+                sections: [
+                    {
+                        heading: "Installing the JDK",
+                        content: `<p>The Java Development Kit (JDK) is essential for developing Java applications. The installation process involves downloading the appropriate JDK version for your operating system and configuring the system's environment variables.</p>
+                        <div class="key-points">
+                            <h4>📋 Installation Steps</h4>
+                            <ol>
+                                <li>Download the latest JDK from Oracle's official website or use OpenJDK</li>
+                                <li>Run the installer and choose the installation directory</li>
+                                <li>Set the <code>JAVA_HOME</code> environment variable to the JDK installation path</li>
+                                <li>Add <code>%JAVA_HOME%\\bin</code> to the system <code>PATH</code> variable</li>
+                                <li>Verify installation by running <code>java -version</code> and <code>javac -version</code></li>
+                            </ol>
+                        </div>`
+                    },
+                    {
+                        heading: "Environment Variables",
+                        content: `<p>Environment variables tell the operating system where to find the Java tools. The two critical variables are:</p>
+                        <div class="concept-card">
+                            <h4>JAVA_HOME</h4>
+                            <p>Points to the root directory of the JDK installation (e.g., <code>C:\\Program Files\\Java\\jdk-17</code>). Many Java-based tools and frameworks rely on this variable to locate the JDK.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>PATH Variable</h4>
+                            <p>By adding the JDK's <code>bin</code> directory to PATH, you can run Java commands (<code>java</code>, <code>javac</code>, <code>jar</code>) from any directory in the command prompt without specifying the full path.</p>
+                        </div>`
+                    },
+                    {
+                        heading: "Compilation & Execution Process",
+                        content: `<p>Java follows a two-step process: <strong>compilation</strong> (source code → bytecode) and <strong>interpretation</strong> (bytecode → machine code via JVM).</p>
+                        <div class="code-block">
+                            <span class="code-label">Terminal</span>
+                            <pre><span class="comment">// Step 1: Compile the Java source file</span>
+javac HelloWorld.java
+
+<span class="comment">// Step 2: Run the compiled bytecode</span>
+java HelloWorld
+
+<span class="comment">// Output:</span>
+<span class="string">Hello, World!</span></pre>
+                        </div>
+                        <p>The <code>javac</code> compiler produces a <code>.class</code> file containing bytecode. The <code>java</code> command launches the JVM, which interprets/compiles this bytecode into native machine instructions at runtime (JIT compilation).</p>`
+                    }
+                ]
+            },
+            3: {
+                badge: "Lab Session 3",
+                title: "Data Types, Variables & Operators",
+                aim: "To understand Java data types, variable declarations, type casting, and the various operators available in Java.",
+                pdf: "LAB SESSION 3 WORK.pdf",
+                sections: [
+                    {
+                        heading: "Primitive Data Types",
+                        content: `<p>Java provides 8 primitive data types that serve as the building blocks for data manipulation:</p>
+                        <table class="theory-table">
+                            <tr><th>Type</th><th>Size</th><th>Range</th><th>Default</th></tr>
+                            <tr><td><code>byte</code></td><td>1 byte</td><td>-128 to 127</td><td>0</td></tr>
+                            <tr><td><code>short</code></td><td>2 bytes</td><td>-32,768 to 32,767</td><td>0</td></tr>
+                            <tr><td><code>int</code></td><td>4 bytes</td><td>-2³¹ to 2³¹-1</td><td>0</td></tr>
+                            <tr><td><code>long</code></td><td>8 bytes</td><td>-2⁶³ to 2⁶³-1</td><td>0L</td></tr>
+                            <tr><td><code>float</code></td><td>4 bytes</td><td>±3.4 × 10³⁸</td><td>0.0f</td></tr>
+                            <tr><td><code>double</code></td><td>8 bytes</td><td>±1.7 × 10³⁰⁸</td><td>0.0d</td></tr>
+                            <tr><td><code>char</code></td><td>2 bytes</td><td>0 to 65,535 (Unicode)</td><td>'\\u0000'</td></tr>
+                            <tr><td><code>boolean</code></td><td>1 bit</td><td>true / false</td><td>false</td></tr>
+                        </table>`
+                    },
+                    {
+                        heading: "Variables & Declaration",
+                        content: `<p>A variable is a container that holds a value during program execution. Java requires every variable to have a declared type.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="comment">// Variable declarations</span>
+<span class="keyword">int</span> age = <span class="number">20</span>;
+<span class="keyword">double</span> gpa = <span class="number">3.85</span>;
+<span class="keyword">char</span> grade = <span class="string">'A'</span>;
+<span class="keyword">boolean</span> isStudent = <span class="keyword">true</span>;
+String name = <span class="string">"Bala Koteswararao"</span>;
+
+<span class="comment">// Constants (immutable variables)</span>
+<span class="keyword">final double</span> PI = <span class="number">3.14159265</span>;</pre>
+                        </div>
+                        <div class="key-points">
+                            <h4>🔑 Variable Naming Rules</h4>
+                            <ul>
+                                <li>Must begin with a letter, underscore (_), or dollar sign ($)</li>
+                                <li>Cannot use Java reserved keywords</li>
+                                <li>Java is case-sensitive (<code>age</code> ≠ <code>Age</code>)</li>
+                                <li>Follow camelCase convention for variables and methods</li>
+                            </ul>
+                        </div>`
+                    },
+                    {
+                        heading: "Type Casting",
+                        content: `<p>Type casting converts a value from one data type to another. Java supports two types:</p>
+                        <div class="concept-card">
+                            <h4>Widening (Implicit) Casting</h4>
+                            <p>Automatic conversion from a smaller to a larger type: <code>byte → short → int → long → float → double</code>. No data loss occurs.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h4>Narrowing (Explicit) Casting</h4>
+                            <p>Manual conversion from a larger to a smaller type. Requires explicit cast syntax and may cause data loss.</p>
+                        </div>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="comment">// Widening casting (automatic)</span>
+<span class="keyword">int</span> num = <span class="number">100</span>;
+<span class="keyword">double</span> dNum = num;  <span class="comment">// 100.0</span>
+
+<span class="comment">// Narrowing casting (manual)</span>
+<span class="keyword">double</span> pi = <span class="number">3.14159</span>;
+<span class="keyword">int</span> intPi = (<span class="keyword">int</span>) pi;  <span class="comment">// 3 (decimal part lost)</span></pre>
+                        </div>`
+                    },
+                    {
+                        heading: "Operators in Java",
+                        content: `<p>Java provides a rich set of operators for performing operations on variables and values:</p>
+                        <table class="theory-table">
+                            <tr><th>Category</th><th>Operators</th><th>Example</th></tr>
+                            <tr><td>Arithmetic</td><td><code>+ - * / %</code></td><td><code>a + b</code></td></tr>
+                            <tr><td>Relational</td><td><code>== != > < >= <=</code></td><td><code>a >= b</code></td></tr>
+                            <tr><td>Logical</td><td><code>&& || !</code></td><td><code>a && b</code></td></tr>
+                            <tr><td>Assignment</td><td><code>= += -= *= /=</code></td><td><code>a += 5</code></td></tr>
+                            <tr><td>Bitwise</td><td><code>& | ^ ~ << >></code></td><td><code>a & b</code></td></tr>
+                            <tr><td>Ternary</td><td><code>? :</code></td><td><code>a > b ? a : b</code></td></tr>
+                        </table>`
+                    }
+                ]
+            },
+            6: {
+                badge: "Lab Session 6",
+                title: "Classes, Objects & Methods",
+                aim: "To understand the concepts of classes and objects in Java, including constructors, methods, access modifiers, and the 'this' keyword.",
+                pdf: "LAB SESSION 6 WORK (1).pdf",
+                sections: [
+                    {
+                        heading: "Classes and Objects",
+                        content: `<p>A <strong>class</strong> is a blueprint or template that defines the properties (fields) and behaviors (methods) of objects. An <strong>object</strong> is an instance of a class — a concrete entity created from the blueprint.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">public class</span> <span class="type">Student</span> {
+    <span class="comment">// Fields (attributes)</span>
+    String name;
+    <span class="keyword">int</span> rollNumber;
+    <span class="keyword">double</span> gpa;
+
+    <span class="comment">// Method (behavior)</span>
+    <span class="keyword">void</span> <span class="method">displayInfo</span>() {
+        System.out.println(name + <span class="string">" - "</span> + rollNumber);
+    }
+}
+
+<span class="comment">// Creating an object</span>
+<span class="type">Student</span> s1 = <span class="keyword">new</span> <span class="type">Student</span>();
+s1.name = <span class="string">"Bala"</span>;
+s1.rollNumber = <span class="number">2906</span>;
+s1.<span class="method">displayInfo</span>();</pre>
+                        </div>`
+                    },
+                    {
+                        heading: "Constructors",
+                        content: `<p>A constructor is a special method invoked when an object is created. It initializes the object's state. Constructors have the same name as the class and no return type.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">public class</span> <span class="type">Student</span> {
+    String name;
+    <span class="keyword">int</span> rollNumber;
+
+    <span class="comment">// Default constructor</span>
+    <span class="type">Student</span>() {
+        name = <span class="string">"Unknown"</span>;
+        rollNumber = <span class="number">0</span>;
+    }
+
+    <span class="comment">// Parameterized constructor</span>
+    <span class="type">Student</span>(String name, <span class="keyword">int</span> rollNumber) {
+        <span class="keyword">this</span>.name = name;
+        <span class="keyword">this</span>.rollNumber = rollNumber;
+    }
+}</pre>
+                        </div>
+                        <div class="key-points">
+                            <h4>🔑 Constructor Rules</h4>
+                            <ul>
+                                <li>Must have the same name as the class</li>
+                                <li>Has no return type (not even <code>void</code>)</li>
+                                <li>Called automatically when <code>new</code> is used</li>
+                                <li>Java provides a default constructor if none is defined</li>
+                                <li>Supports <strong>constructor overloading</strong> (multiple constructors with different parameters)</li>
+                            </ul>
+                        </div>`
+                    },
+                    {
+                        heading: "Access Modifiers",
+                        content: `<p>Access modifiers control the visibility and accessibility of classes, methods, and fields:</p>
+                        <table class="theory-table">
+                            <tr><th>Modifier</th><th>Class</th><th>Package</th><th>Subclass</th><th>World</th></tr>
+                            <tr><td><code>public</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                            <tr><td><code>protected</code></td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+                            <tr><td><em>default</em></td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+                            <tr><td><code>private</code></td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+                        </table>`
+                    },
+                    {
+                        heading: "The 'this' Keyword",
+                        content: `<p>The <code>this</code> keyword refers to the current object instance. It is commonly used to:</p>
+                        <ul>
+                            <li>Distinguish between instance variables and parameters with the same name</li>
+                            <li>Call another constructor from within a constructor (<code>this()</code>)</li>
+                            <li>Pass the current object as an argument to another method</li>
+                            <li>Return the current object from a method</li>
+                        </ul>
+                        <div class="concept-card">
+                            <h4>Why 'this' Matters</h4>
+                            <p>When a method parameter has the same name as an instance variable, Java uses the local parameter by default. The <code>this</code> keyword explicitly refers to the instance variable, resolving the ambiguity: <code>this.name = name;</code></p>
+                        </div>`
+                    }
+                ]
+            },
+            7: {
+                badge: "Lab Session 7",
+                title: "Inheritance in Java",
+                aim: "To understand the concept of inheritance, its types, method overriding, and the use of the 'super' keyword in Java.",
+                pdf: "LAB SESSION 7 WORK.pdf",
+                sections: [
+                    {
+                        heading: "What is Inheritance?",
+                        content: `<p>Inheritance is a fundamental OOP mechanism where a new class (<strong>child/sub class</strong>) derives properties and behaviors from an existing class (<strong>parent/super class</strong>). It promotes <strong>code reusability</strong> and establishes an <em>IS-A</em> relationship between classes.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="comment">// Parent class</span>
+<span class="keyword">class</span> <span class="type">Animal</span> {
+    String name;
+    <span class="keyword">void</span> <span class="method">eat</span>() {
+        System.out.println(name + <span class="string">" is eating"</span>);
+    }
+}
+
+<span class="comment">// Child class inherits from Animal</span>
+<span class="keyword">class</span> <span class="type">Dog</span> <span class="keyword">extends</span> <span class="type">Animal</span> {
+    <span class="keyword">void</span> <span class="method">bark</span>() {
+        System.out.println(name + <span class="string">" is barking"</span>);
+    }
+}
+
+<span class="comment">// Usage</span>
+<span class="type">Dog</span> d = <span class="keyword">new</span> <span class="type">Dog</span>();
+d.name = <span class="string">"Buddy"</span>;
+d.<span class="method">eat</span>();   <span class="comment">// Inherited method</span>
+d.<span class="method">bark</span>();  <span class="comment">// Own method</span></pre>
+                        </div>`
+                    },
+                    {
+                        heading: "Types of Inheritance",
+                        content: `<table class="theory-table">
+                            <tr><th>Type</th><th>Description</th><th>Supported in Java?</th></tr>
+                            <tr><td><strong>Single</strong></td><td>One child inherits from one parent</td><td>✅ Yes</td></tr>
+                            <tr><td><strong>Multilevel</strong></td><td>A → B → C (chain)</td><td>✅ Yes</td></tr>
+                            <tr><td><strong>Hierarchical</strong></td><td>Multiple children inherit from one parent</td><td>✅ Yes</td></tr>
+                            <tr><td><strong>Multiple</strong></td><td>One child inherits from multiple parents</td><td>❌ Not with classes (use interfaces)</td></tr>
+                            <tr><td><strong>Hybrid</strong></td><td>Combination of types</td><td>❌ Not directly (use interfaces)</td></tr>
+                        </table>
+                        <div class="key-points">
+                            <h4>⚠️ Why No Multiple Inheritance?</h4>
+                            <p>Java avoids multiple class inheritance to prevent the <strong>Diamond Problem</strong> — ambiguity when two parent classes have methods with the same signature. Java solves this through <strong>interfaces</strong>, which allow multiple inheritance of type.</p>
+                        </div>`
+                    },
+                    {
+                        heading: "Method Overriding",
+                        content: `<p>When a subclass provides its own implementation of a method already defined in its superclass, it is called <strong>method overriding</strong>. This enables <strong>runtime polymorphism</strong>.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">class</span> <span class="type">Shape</span> {
+    <span class="keyword">void</span> <span class="method">draw</span>() {
+        System.out.println(<span class="string">"Drawing a shape"</span>);
+    }
+}
+
+<span class="keyword">class</span> <span class="type">Circle</span> <span class="keyword">extends</span> <span class="type">Shape</span> {
+    <span class="keyword">@Override</span>
+    <span class="keyword">void</span> <span class="method">draw</span>() {
+        System.out.println(<span class="string">"Drawing a circle"</span>);
+    }
+}
+
+<span class="type">Shape</span> s = <span class="keyword">new</span> <span class="type">Circle</span>();
+s.<span class="method">draw</span>();  <span class="comment">// Output: Drawing a circle</span></pre>
+                        </div>`
+                    },
+                    {
+                        heading: "The 'super' Keyword",
+                        content: `<p>The <code>super</code> keyword refers to the immediate parent class. It is used to:</p>
+                        <ul>
+                            <li>Access parent class methods: <code>super.methodName()</code></li>
+                            <li>Access parent class fields: <code>super.fieldName</code></li>
+                            <li>Call parent class constructor: <code>super()</code> or <code>super(args)</code></li>
+                        </ul>
+                        <div class="concept-card">
+                            <h4>Constructor Chaining</h4>
+                            <p>When a subclass object is created, the parent class constructor is called first (either implicitly via <code>super()</code> or explicitly). This ensures proper initialization of inherited members before the subclass adds its own state.</p>
+                        </div>`
+                    }
+                ]
+            },
+            8: {
+                badge: "Lab Session 8",
+                title: "Interfaces & Abstract Classes",
+                aim: "To understand the concepts of abstraction in Java through abstract classes and interfaces, and how they enable loose coupling and multiple inheritance.",
+                pdf: "LAB SESSION 8 WORK.pdf",
+                sections: [
+                    {
+                        heading: "Abstract Classes",
+                        content: `<p>An abstract class is a class that <strong>cannot be instantiated</strong> and may contain abstract methods (without implementation). It serves as a partial blueprint for subclasses.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">abstract class</span> <span class="type">Vehicle</span> {
+    String brand;
+
+    <span class="comment">// Abstract method (no body)</span>
+    <span class="keyword">abstract void</span> <span class="method">start</span>();
+
+    <span class="comment">// Concrete method</span>
+    <span class="keyword">void</span> <span class="method">stop</span>() {
+        System.out.println(<span class="string">"Vehicle stopped"</span>);
+    }
+}
+
+<span class="keyword">class</span> <span class="type">Car</span> <span class="keyword">extends</span> <span class="type">Vehicle</span> {
+    <span class="keyword">@Override</span>
+    <span class="keyword">void</span> <span class="method">start</span>() {
+        System.out.println(<span class="string">"Car started with key"</span>);
+    }
+}</pre>
+                        </div>`
+                    },
+                    {
+                        heading: "Interfaces",
+                        content: `<p>An interface is a contract that defines <strong>what</strong> a class must do, but not <strong>how</strong>. All methods in an interface are implicitly <code>public</code> and <code>abstract</code> (prior to Java 8). A class can implement <strong>multiple interfaces</strong>.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">interface</span> <span class="type">Drawable</span> {
+    <span class="keyword">void</span> <span class="method">draw</span>();
+}
+
+<span class="keyword">interface</span> <span class="type">Resizable</span> {
+    <span class="keyword">void</span> <span class="method">resize</span>(<span class="keyword">int</span> factor);
+}
+
+<span class="keyword">class</span> <span class="type">Rectangle</span> <span class="keyword">implements</span> <span class="type">Drawable</span>, <span class="type">Resizable</span> {
+    <span class="keyword">@Override</span>
+    <span class="keyword">public void</span> <span class="method">draw</span>() {
+        System.out.println(<span class="string">"Drawing rectangle"</span>);
+    }
+
+    <span class="keyword">@Override</span>
+    <span class="keyword">public void</span> <span class="method">resize</span>(<span class="keyword">int</span> factor) {
+        System.out.println(<span class="string">"Resizing by "</span> + factor);
+    }
+}</pre>
+                        </div>`
+                    },
+                    {
+                        heading: "Abstract Class vs Interface",
+                        content: `<table class="theory-table">
+                            <tr><th>Feature</th><th>Abstract Class</th><th>Interface</th></tr>
+                            <tr><td>Methods</td><td>Abstract + Concrete</td><td>Abstract (+ default/static from Java 8)</td></tr>
+                            <tr><td>Variables</td><td>Any type</td><td>Only <code>public static final</code></td></tr>
+                            <tr><td>Constructors</td><td>Yes</td><td>No</td></tr>
+                            <tr><td>Multiple Inheritance</td><td>No</td><td>Yes</td></tr>
+                            <tr><td>Keyword</td><td><code>extends</code></td><td><code>implements</code></td></tr>
+                            <tr><td>Speed</td><td>Faster</td><td>Slightly slower (indirection)</td></tr>
+                        </table>
+                        <div class="key-points">
+                            <h4>💡 When to Use What?</h4>
+                            <ul>
+                                <li>Use an <strong>abstract class</strong> when classes share common behavior and you want to provide partial implementation</li>
+                                <li>Use an <strong>interface</strong> when unrelated classes need to share a common contract, or when you need multiple inheritance</li>
+                            </ul>
+                        </div>`
+                    }
+                ]
+            },
+            10: {
+                badge: "Lab Session 10",
+                title: "Exception Handling in Java",
+                aim: "To understand the exception handling mechanism in Java, including try-catch blocks, throw/throws keywords, and custom exceptions.",
+                pdf: "LAB SESSION 10 WORK.pdf",
+                sections: [
+                    {
+                        heading: "What are Exceptions?",
+                        content: `<p>An exception is an <strong>abnormal event</strong> that disrupts the normal flow of program execution. Java's exception handling mechanism provides a structured way to detect and handle runtime errors, ensuring the program can recover gracefully.</p>
+                        <div class="concept-card">
+                            <h4>Exception Hierarchy</h4>
+                            <p><code>Throwable</code> → <code>Exception</code> (checked) + <code>RuntimeException</code> (unchecked) and <code>Error</code> (system-level). Checked exceptions must be handled at compile time; unchecked exceptions occur at runtime and are optional to catch.</p>
+                        </div>`
+                    },
+                    {
+                        heading: "Try-Catch-Finally",
+                        content: `<p>The <code>try</code> block contains code that might throw an exception. The <code>catch</code> block handles the exception. The <code>finally</code> block executes regardless of whether an exception occurs.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">try</span> {
+    <span class="keyword">int</span> result = <span class="number">10</span> / <span class="number">0</span>;
+    System.out.println(result);
+} <span class="keyword">catch</span> (<span class="type">ArithmeticException</span> e) {
+    System.out.println(<span class="string">"Cannot divide by zero: "</span> + e.getMessage());
+} <span class="keyword">catch</span> (<span class="type">Exception</span> e) {
+    System.out.println(<span class="string">"General error: "</span> + e.getMessage());
+} <span class="keyword">finally</span> {
+    System.out.println(<span class="string">"This always executes"</span>);
+}</pre>
+                        </div>
+                        <div class="key-points">
+                            <h4>🔑 Important Rules</h4>
+                            <ul>
+                                <li>Multiple catch blocks must go from <strong>specific to general</strong></li>
+                                <li>The <code>finally</code> block always runs (even after return)</li>
+                                <li><code>try</code> must be followed by either <code>catch</code> or <code>finally</code> (or both)</li>
+                                <li>Use <strong>try-with-resources</strong> for auto-closing streams and connections</li>
+                            </ul>
+                        </div>`
+                    },
+                    {
+                        heading: "Throw and Throws",
+                        content: `<p><code>throw</code> is used to explicitly throw an exception. <code>throws</code> is used in the method signature to declare that a method may throw certain exceptions.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="comment">// Using throw</span>
+<span class="keyword">void</span> <span class="method">validateAge</span>(<span class="keyword">int</span> age) {
+    <span class="keyword">if</span> (age < <span class="number">18</span>) {
+        <span class="keyword">throw new</span> <span class="type">IllegalArgumentException</span>(<span class="string">"Age must be 18+"</span>);
+    }
+}
+
+<span class="comment">// Using throws</span>
+<span class="keyword">void</span> <span class="method">readFile</span>(String path) <span class="keyword">throws</span> <span class="type">IOException</span> {
+    FileReader fr = <span class="keyword">new</span> <span class="type">FileReader</span>(path);
+    <span class="comment">// ... read file</span>
+}</pre>
+                        </div>`
+                    },
+                    {
+                        heading: "Custom Exceptions",
+                        content: `<p>You can create your own exception classes by extending <code>Exception</code> (checked) or <code>RuntimeException</code> (unchecked). This provides meaningful, domain-specific error handling.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">class</span> <span class="type">InsufficientBalanceException</span> <span class="keyword">extends</span> <span class="type">Exception</span> {
+    <span class="keyword">private double</span> amount;
+
+    <span class="type">InsufficientBalanceException</span>(<span class="keyword">double</span> amount) {
+        <span class="keyword">super</span>(<span class="string">"Insufficient balance. Deficit: "</span> + amount);
+        <span class="keyword">this</span>.amount = amount;
+    }
+}
+
+<span class="comment">// Usage</span>
+<span class="keyword">void</span> <span class="method">withdraw</span>(<span class="keyword">double</span> amount) <span class="keyword">throws</span> <span class="type">InsufficientBalanceException</span> {
+    <span class="keyword">if</span> (amount > balance) {
+        <span class="keyword">throw new</span> <span class="type">InsufficientBalanceException</span>(amount - balance);
+    }
+    balance -= amount;
+}</pre>
+                        </div>
+                        <div class="concept-card">
+                            <h4>Common Built-in Exceptions</h4>
+                            <p><code>NullPointerException</code> • <code>ArrayIndexOutOfBoundsException</code> • <code>ClassCastException</code> • <code>NumberFormatException</code> • <code>IOException</code> • <code>FileNotFoundException</code> • <code>ArithmeticException</code> • <code>IllegalArgumentException</code></p>
+                        </div>`
+                    }
+                ]
+            },
+            11: {
+                badge: "Lab Session 11",
+                title: "Multithreading in Java",
+                aim: "To understand the concepts of multithreading, thread lifecycle, synchronization, and creating threads using Thread class and Runnable interface.",
+                pdf: "LAB SESSION 11 WORK.pdf",
+                sections: [
+                    {
+                        heading: "What is Multithreading?",
+                        content: `<p>Multithreading is the ability to execute <strong>multiple threads simultaneously</strong> within a single program. A thread is the smallest unit of processing. Multithreading enables efficient CPU utilization and responsive applications.</p>
+                        <div class="concept-card">
+                            <h4>Process vs Thread</h4>
+                            <p><strong>Process:</strong> An independent program with its own memory space. <strong>Thread:</strong> A lightweight sub-process that shares memory space with other threads in the same process. Threads are faster to create and switch between than processes.</p>
+                        </div>`
+                    },
+                    {
+                        heading: "Creating Threads",
+                        content: `<p>Java provides two ways to create threads:</p>
+                        <div class="code-block">
+                            <span class="code-label">Method 1: Extending Thread Class</span>
+                            <pre><span class="keyword">class</span> <span class="type">MyThread</span> <span class="keyword">extends</span> <span class="type">Thread</span> {
+    <span class="keyword">@Override</span>
+    <span class="keyword">public void</span> <span class="method">run</span>() {
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i < <span class="number">5</span>; i++) {
+            System.out.println(Thread.<span class="method">currentThread</span>().<span class="method">getName</span>() + <span class="string">": "</span> + i);
+        }
+    }
+}
+
+<span class="type">MyThread</span> t1 = <span class="keyword">new</span> <span class="type">MyThread</span>();
+t1.<span class="method">start</span>();  <span class="comment">// Don't call run() directly!</span></pre>
+                        </div>
+                        <div class="code-block">
+                            <span class="code-label">Method 2: Implementing Runnable Interface</span>
+                            <pre><span class="keyword">class</span> <span class="type">MyRunnable</span> <span class="keyword">implements</span> <span class="type">Runnable</span> {
+    <span class="keyword">@Override</span>
+    <span class="keyword">public void</span> <span class="method">run</span>() {
+        System.out.println(<span class="string">"Thread is running"</span>);
+    }
+}
+
+<span class="type">Thread</span> t2 = <span class="keyword">new</span> <span class="type">Thread</span>(<span class="keyword">new</span> <span class="type">MyRunnable</span>());
+t2.<span class="method">start</span>();</pre>
+                        </div>`
+                    },
+                    {
+                        heading: "Thread Lifecycle",
+                        content: `<p>A thread goes through several states during its lifetime:</p>
+                        <table class="theory-table">
+                            <tr><th>State</th><th>Description</th></tr>
+                            <tr><td><strong>New</strong></td><td>Thread object is created but <code>start()</code> hasn't been called</td></tr>
+                            <tr><td><strong>Runnable</strong></td><td>Thread is ready to run, waiting for CPU time</td></tr>
+                            <tr><td><strong>Running</strong></td><td>Thread is currently executing</td></tr>
+                            <tr><td><strong>Blocked/Waiting</strong></td><td>Thread is waiting for a resource or notification</td></tr>
+                            <tr><td><strong>Terminated</strong></td><td>Thread has completed execution or was stopped</td></tr>
+                        </table>
+                        <div class="key-points">
+                            <h4>🔑 Important Thread Methods</h4>
+                            <ul>
+                                <li><code>start()</code> — begins thread execution (calls <code>run()</code> internally)</li>
+                                <li><code>sleep(ms)</code> — pauses thread for specified milliseconds</li>
+                                <li><code>join()</code> — waits for a thread to finish before proceeding</li>
+                                <li><code>yield()</code> — suggests the scheduler give time to other threads</li>
+                                <li><code>interrupt()</code> — interrupts a sleeping or waiting thread</li>
+                            </ul>
+                        </div>`
+                    },
+                    {
+                        heading: "Synchronization",
+                        content: `<p>When multiple threads access shared resources, <strong>race conditions</strong> can occur. Synchronization ensures only one thread accesses a critical section at a time.</p>
+                        <div class="code-block">
+                            <span class="code-label">Java</span>
+                            <pre><span class="keyword">class</span> <span class="type">Counter</span> {
+    <span class="keyword">private int</span> count = <span class="number">0</span>;
+
+    <span class="comment">// Synchronized method</span>
+    <span class="keyword">synchronized void</span> <span class="method">increment</span>() {
+        count++;
+    }
+
+    <span class="keyword">int</span> <span class="method">getCount</span>() {
+        <span class="keyword">return</span> count;
+    }
+}</pre>
+                        </div>
+                        <div class="concept-card">
+                            <h4>Deadlock</h4>
+                            <p>A deadlock occurs when two or more threads are <strong>permanently blocked</strong>, each waiting for the other to release a resource. To prevent deadlocks: acquire locks in a consistent order, use timeouts, and minimize synchronized blocks.</p>
+                        </div>`
+                    }
+                ]
+            }
+        };
+
+        function showTheory(sessionNum, element) {
+            // Update active state in sidebar
+            const links = document.querySelectorAll('.lab-list a');
+            links.forEach(link => link.classList.remove('active'));
+            element.classList.add('active');
+
+            const data = theoryData[sessionNum];
+            if (!data) return;
+
+            const container = document.getElementById('viewerContainer');
+
+            let html = '<div class="theory-content">';
+            html += '<div class="theory-header">';
+            html += `<span class="lab-badge">${data.badge}</span>`;
+            html += `<h2>${data.title}</h2>`;
+            html += `<p class="aim"><strong>Aim:</strong> ${data.aim}</p>`;
+            html += '</div>';
+
+            data.sections.forEach(section => {
+                html += '<div class="theory-section">';
+                html += `<h3>${section.heading}</h3>`;
+                html += section.content;
+                html += '</div>';
+            });
+
+            html += '<div class="pdf-embed-section">';
+            html += '<h3>📄 Original Lab Work Document</h3>';
+            html += '<div class="pdf-embed-wrapper">';
+            html += '<object data="' + data.pdf + '" type="application/pdf" width="100%" height="800px">';
+            html += '<p style="padding:20px; color:#666;">Unable to display PDF. <a href="' + data.pdf + '" target="_blank" style="color:#6C63FF;">Download the document</a> instead.</p>';
+            html += '</object>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+    </script>
+    <!-- Lightbox Modal -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox(event)">✕</button>
+            <img src="profile.jpeg" alt="Profile Photo">
+            <div class="lightbox-name">
+                Ch.V.S.Bala Koteswararao
+                <span>Roll Number: 26EU02906 | Section: AIML-B</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openLightbox() {
+            const lb = document.getElementById('lightbox');
+            lb.style.display = 'flex';
+            requestAnimationFrame(() => lb.classList.add('active'));
+        }
+
+        function closeLightbox(e) {
+            const lb = document.getElementById('lightbox');
+            if (e.target === lb || e.currentTarget.classList.contains('lightbox-close')) {
+                lb.classList.remove('active');
+                setTimeout(() => lb.style.display = 'none', 300);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const lb = document.getElementById('lightbox');
+                lb.classList.remove('active');
+                setTimeout(() => lb.style.display = 'none', 300);
+            }
+        });
+    </script>
+</body>
+</html>
